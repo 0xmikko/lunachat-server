@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "dev": "nodemon",
+    "start": "./node_modules/.bin/forever --minUptime 10000 --spinSleepTime 1000 -v -c  ./node_modules/.bin/ts-node ./src/index.ts ",
+    "postinstall": "cd web && yarn && yarn build"
+  },
+  "resolutions": {
+    "tslib": "1.11.2"
+  },
   "dependencies": {
     "@sentry/node": "^5.16.0",
     "ajv": "^6.12.2",
@@ -17,6 +25,7 @@
     "moment": "^2.25.3",
     "morgan": "^1.10.0",
     "node-cache": "^5.1.0",
+    "pg": "^8.3.0",
     "reflect-metadata": "^0.1.13",
     "socketio": "^1.0.0",
     "socketio-auth": "^0.1.1",
@@ -24,6 +33,7 @@
     "ts-node": "^8.10.1",
     "tslib": "^2.0.0",
     "twilio": "^3.44.0",
+    "typeorm": "^0.2.25",
     "typescript": "^3.9.2",
     "uuid": "^8.1.0"
   },

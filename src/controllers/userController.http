@@ -1,0 +1,15 @@
+POST http://localhost:4000/api/users/send_code/
+Content-Type: application/json
+
+{
+  "phone": "+79219451207"
+}
+
+###
+POST http://localhost:4000/api/users/login/
+Content-Type: application/json
+
+{
+  "phone": "+79219451207",
+  "code": "206145"
+}

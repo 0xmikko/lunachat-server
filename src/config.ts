@@ -1,4 +1,8 @@
-import fs from "fs";
+/*
+ * Lunachat - sattelite chat based on NuCypher
+ * Copyright (c) 2020. Mikhail Lazarev
+ */
+
 import { validate, IsNotEmpty } from "class-validator";
 
 export class Config {
@@ -38,6 +42,7 @@ export class Config {
     Config.sentryDSN = process.env.SENTRY_DSN|| "";
     Config.send_to_debug = process.env.SEND_TO_DEBUG === "true";
     Config.debug_phone = process.env.DEBUG_PHONE || "";
+
   }
 
 
