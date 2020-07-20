@@ -22,7 +22,7 @@ export class User {
   @Column({default: ''})
   avatar: string;
 
-  @ManyToMany((type) => Chat)
+  @ManyToMany((type) => Chat, (chat) => chat.members)
   chats: Chat[];
 
   @OneToMany((type) => Message, (message) => message.owner)
@@ -59,7 +59,7 @@ export interface UserRepositoryI extends BasicRepositoryI<User> {
 }
 
 export interface UserServiceI extends SocketPusherDelegateI {
-  createProfile(Profile_id: string): Promise<void>;
+  createProfile(Profile_id: string): Promise<User>;
   getProfile(Profile_id: string): Promise<User | undefined>;
   addContact(
     Profile_id: string,

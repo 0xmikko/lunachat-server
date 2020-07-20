@@ -15,7 +15,8 @@ export class UserRepository extends TypeORMRepository<User> implements UserRepos
   }
 
   async findOneFull(id: string): Promise<User | undefined> {
-    let user = await this.repository.findOne(id, {relations: []});
+    console.log("ID", id)
+    let user = await this.repository.findOne(id, {relations: ['chats', 'contacts']});
     if (user === undefined) throw 'User not found!';
 
     return user;

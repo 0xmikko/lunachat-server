@@ -40,14 +40,15 @@ export class UserService implements UserServiceI {
   }
 
 
-  async createProfile(user_id: string): Promise<void> {
+  async createProfile(user_id: string): Promise<User> {
     const profile = DefaultUser;
     profile.id = user_id;
     try {
-      await this._repository.insert(profile);
+      profile.id = await this._repository.insert(profile) || profile.id;
     } catch (e) {
       this._profileInProgress.delete(user_id);
     }
+    return profile
   }
 
   async getProfile(user_id: string): Promise<User | undefined> {

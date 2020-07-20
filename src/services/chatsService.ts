@@ -92,6 +92,7 @@ export class ChatsService implements ChatsServiceI {
   }
 
   async create(user_id: string, dto: ChatCreateDTO): Promise<Chat | undefined> {
+    console.log(dto)
     if (
       dto.members.length < 2 ||
       (dto.members[0] !== user_id && dto.members[1] !== user_id)

@@ -12,7 +12,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import {TYPES} from '../types';
 import {AuthWebController} from '../controllers/authWebController';
-import {UserServiceI} from '../core/user';
+import {User, UserServiceI} from '../core/user';
 import {tokenData, TokenPair} from "../payloads/userPayload";
 
 @injectable()
@@ -78,12 +78,14 @@ export class AuthService implements AuthServiceI {
       }
       const user_id = this.getHash(phone);
       console.log(`Logged in ${phone} with id ${user_id}`);
+      let user : User | undefined
       try {
-        await this._profileService.getProfile(user_id);
+        user = await this._profileService.getProfile(user_id);
       } catch (e) {
-        await this._profileService.createProfile(user_id);
+        user = await this._profileService.createProfile(user_id);
       }
-      resolve(this.generateTokenPair(user_id));
+      if (user === undefined) throw new Error("Cant create user")
+      resolve(this.generateTokenPair(user.id));
     });
   }
 

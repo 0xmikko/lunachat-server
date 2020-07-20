@@ -30,7 +30,7 @@ export class Chat {
   @Column({default: ''})
   name: string;
 
-  @ManyToMany(type => User)
+  @ManyToMany(type => User, user => user.chats)
   @JoinTable()
   members: User[];
 
