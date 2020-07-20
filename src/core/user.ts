@@ -25,7 +25,7 @@ export class User {
   @ManyToMany((type) => Chat, (chat) => chat.members)
   chats: Chat[];
 
-  @OneToMany((type) => Message, (message) => message.owner)
+  @OneToMany((type) => Message, (message) => message.user)
   messages: Message[];
 
   @ManyToMany((type) => User, (Profile) => Profile.following)

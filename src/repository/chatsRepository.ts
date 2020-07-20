@@ -15,7 +15,7 @@ export class ChatsRepository extends TypeORMRepository<Chat>
   }
 
   findByIdFull(id: string): Promise<Chat | undefined> {
-    return this.repository.findOne({where: {id}, relations: ['messages']});
+    return this.repository.findOne({where: {id}, relations: ['members', 'messages', 'messages.user']});
   }
 
   async update(user_id: string, newChat: Chat): Promise<void> {

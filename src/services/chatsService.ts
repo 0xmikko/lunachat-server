@@ -19,7 +19,7 @@ import {
 export class ChatsService implements ChatsServiceI {
   private _repository: ChatsRepositoryI;
   private _messagesRepository: MessagesRepositoryI;
-  private _profilesRepository: UserRepositoryI;
+  private _userRepository: UserRepositoryI;
   private _profilesService: UserServiceI;
   private _pusher: SocketPusher;
 
@@ -31,7 +31,7 @@ export class ChatsService implements ChatsServiceI {
   ) {
     this._repository = repository;
     this._messagesRepository = messagesRepository;
-    this._profilesRepository = profilesRepository;
+    this._userRepository = profilesRepository;
     this._profilesService = profilesService;
   }
 
@@ -46,11 +46,17 @@ export class ChatsService implements ChatsServiceI {
   }
 
   async postMessage(user_id: string, dto: PostMessageDTO): Promise<void> {
+    console.log(user_id)
     const chat = await this._repository.findByIdFull(dto.chatId);
-    if (!chat) throw 'Chat not found';
+    if (!chat) throw new Error('Chat not found');
 
     if (!this.isUserInChat(user_id, chat))
       throw 'User is not member of this chat';
+
+    const user = await this._userRepository.findOne(user_id);
+    if (!user) throw new Error('User not found');
+
+    dto.msg.user = user
 
     await this._messagesRepository.addMessage(dto.chatId, dto.msg);
 
@@ -104,7 +110,7 @@ export class ChatsService implements ChatsServiceI {
 
     // Get members profiles
     for (let memId = 0; memId < dto.members.length; memId++) {
-      const currentMember = await this._profilesRepository.findOne(
+      const currentMember = await this._userRepository.findOne(
         dto.members[memId],
       );
       if (currentMember === undefined) {

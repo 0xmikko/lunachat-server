@@ -23,13 +23,13 @@ export class Message {
   text: string;
 
   @CreateDateColumn()
-  createdAt: number | Date;
+  createdAt: Date;
 
   @ManyToOne((type) => Chat, (chat) => chat.messages)
   chat: Chat;
 
   @ManyToOne((type) => User, (user) => user.messages)
-  owner: User;
+  user: User;
 }
 
 export interface MessagesRepositoryI {
