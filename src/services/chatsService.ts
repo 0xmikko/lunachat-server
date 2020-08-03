@@ -3,11 +3,21 @@
  * Copyright (c) 2020. Mikhail Lazarev
  */
 
-import {Chat, ChatsRepositoryI, ChatsServiceI} from '../core/chat';
+import {
+  AmpqChatControllerI,
+  Chat,
+  ChatsRepositoryI,
+  ChatsServiceI,
+} from '../core/chat';
 import {inject, injectable} from 'inversify';
 import {TYPES} from '../types';
 import {Message, MessagesRepositoryI} from '../core/message';
-import {User, UserRepositoryI, UserServiceI} from '../core/user';
+import {
+  AmpqUserControllerI,
+  User,
+  UserRepositoryI,
+  UserServiceI,
+} from '../core/user';
 import {SocketPusher} from '../core/socket';
 import {
   ChatCreateDTO,
@@ -22,6 +32,7 @@ export class ChatsService implements ChatsServiceI {
   private _userRepository: UserRepositoryI;
   private _profilesService: UserServiceI;
   private _pusher: SocketPusher;
+  private _ampqControllerDelegate: AmpqChatControllerI;
 
   public constructor(
     @inject(TYPES.ChatsRepository) repository: ChatsRepositoryI,
@@ -39,24 +50,46 @@ export class ChatsService implements ChatsServiceI {
     this._pusher = pusher;
   }
 
+  set ampqControllerDelegate(value: AmpqChatControllerI) {
+    this._ampqControllerDelegate = value;
+  }
+
   async findById(user_id: string, chat_id: string): Promise<Chat> {
     const chat = await this._repository.findByIdFull(chat_id);
     if (!chat) throw 'Chat not found';
     return chat;
   }
 
-  async postMessage(user_id: string, dto: PostMessageDTO): Promise<void> {
-    console.log(user_id)
+  async postMessage(
+    user_id: string,
+    dto: PostMessageDTO,
+    broadcast: boolean = true,
+  ): Promise<void> {
+    console.log(user_id);
     const chat = await this._repository.findByIdFull(dto.chatId);
     if (!chat) throw new Error('Chat not found');
 
-    if (!this.isUserInChat(user_id, chat))
+    if (!this.isUserInChat(user_id, chat)) {
+      console.log(user_id, chat)
       throw 'User is not member of this chat';
+    }
 
     const user = await this._userRepository.findOne(user_id);
     if (!user) throw new Error('User not found');
 
-    dto.msg.user = user
+
+    if (broadcast) {
+      dto.from = user_id;
+      for (let member of chat.members) {
+        if (member.id !== user_id) {
+          await this._ampqControllerDelegate.sendMessage(member, {...dto});
+        }
+      }
+    }
+
+    dto.msg.user = user;
+
+    console.log("DTO_MSG", dto.msg)
 
     await this._messagesRepository.addMessage(dto.chatId, dto.msg);
 
@@ -97,8 +130,12 @@ export class ChatsService implements ChatsServiceI {
     // }
   }
 
-  async create(user_id: string, dto: ChatCreateDTO): Promise<Chat | undefined> {
-    console.log(dto)
+  async create(
+    user_id: string,
+    dto: ChatCreateDTO,
+    broadcast: boolean = true,
+  ): Promise<Chat | undefined> {
+    console.log(dto);
     if (
       dto.members.length < 2 ||
       (dto.members[0] !== user_id && dto.members[1] !== user_id)
@@ -113,10 +150,19 @@ export class ChatsService implements ChatsServiceI {
       const currentMember = await this._userRepository.findOne(
         dto.members[memId],
       );
+
       if (currentMember === undefined) {
         throw 'Members not found';
       }
       members.push(currentMember);
+
+      if (
+          broadcast &&
+          currentMember.id !== undefined &&
+          currentMember.id !== user_id
+      ) {
+        this._ampqControllerDelegate.createChat(currentMember.id, dto);
+      }
     }
 
     // Creating and storing chat

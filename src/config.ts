@@ -32,6 +32,14 @@ export class Config {
   @IsNotEmpty()
   static debug_phone: string;
 
+  @IsNotEmpty()
+  static ampq_url: string;
+
+  @IsNotEmpty()
+  static nucypher_url: string;
+
+
+
   static init() {
     Config.port = parseInt(process.env.PORT || "4000");
     Config.database_url = process.env.DATABASE_URL || "";
@@ -42,6 +50,8 @@ export class Config {
     Config.sentryDSN = process.env.SENTRY_DSN|| "";
     Config.send_to_debug = process.env.SEND_TO_DEBUG === "true";
     Config.debug_phone = process.env.DEBUG_PHONE || "";
+    Config.ampq_url = process.env.AMPQ_URL || "";
+    Config.nucypher_url = process.env.NUCYPHER_URL || "";
 
   }
 

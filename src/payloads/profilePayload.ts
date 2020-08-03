@@ -4,8 +4,10 @@
  */
 
 export interface ProfileUpdateDTO {
+    id?: string
     name: string;
     avatar: string;
+    reader?: string;
 }
 
 export interface ProfileContactDTO {

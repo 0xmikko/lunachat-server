@@ -9,7 +9,7 @@ import {Container} from 'inversify';
 import {TYPES} from './types';
 
 import {AuthWebController} from './controllers/authWebController';
-import {AuthServiceI} from "./core/auth";
+import {AuthServiceI} from './core/auth';
 
 import {ChatsRepositoryI, ChatsServiceI} from './core/chat';
 import {ChatsController} from './controllers/chatsController';
@@ -26,7 +26,7 @@ import {AuthController} from './controllers/authController';
 
 import {MessagesRepositoryI} from './core/message';
 import {MessagesRepository} from './repository/messagesRepository';
-
+import {AmpqController} from './controllers/ampqController';
 
 let container = new Container();
 
@@ -39,7 +39,10 @@ container
   .bind<MessagesRepositoryI>(TYPES.MessagesRepository)
   .to(MessagesRepository)
   .inSingletonScope();
-container.bind<ChatsServiceI>(TYPES.ChatsService).to(ChatsService);
+container
+  .bind<ChatsServiceI>(TYPES.ChatsService)
+  .to(ChatsService)
+  .inSingletonScope();
 container.bind<ChatsController>(TYPES.ChatsController).to(ChatsController);
 
 // PROFILES
@@ -47,10 +50,11 @@ container
   .bind<UserRepositoryI>(TYPES.UserRepository)
   .to(UserRepository)
   .inSingletonScope();
-container.bind<UserServiceI>(TYPES.UserService).to(UserService);
 container
-  .bind<UserController>(TYPES.UserController)
-  .to(UserController);
+  .bind<UserServiceI>(TYPES.UserService)
+  .to(UserService)
+  .inSingletonScope();
+container.bind<UserController>(TYPES.UserController).to(UserController);
 
 // USERS
 container.bind<AuthServiceI>(TYPES.AuthService).to(AuthService);
@@ -59,6 +63,11 @@ container.bind<AuthController>(TYPES.AuthController).to(AuthController);
 container
   .bind<AuthWebController>(TYPES.AuthWebController)
   .to(AuthWebController)
+  .inSingletonScope();
+
+container
+  .bind<AmpqController>(TYPES.AmpqController)
+  .to(AmpqController)
   .inSingletonScope();
 
 export default container;

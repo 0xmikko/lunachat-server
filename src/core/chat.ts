@@ -44,8 +44,20 @@ export interface ChatsRepositoryI extends BasicRepositoryI<Chat> {
 }
 
 export interface ChatsServiceI extends SocketPusherDelegateI {
-  create(user_id: string, dto: ChatCreateDTO): Promise<Chat | undefined>;
+
+  ampqControllerDelegate : AmpqChatControllerI
+
+  create(user_id: string, dto: ChatCreateDTO, broadcast?: boolean): Promise<Chat | undefined>;
   findById(user_id: string, chat_id: string): Promise<Chat>;
-  postMessage(user_id: string, dto: PostMessageDTO): Promise<void>;
+  postMessage(
+      user_id: string,
+      dto: PostMessageDTO,
+      broadcast?: boolean,
+  ): Promise<void>
   deleteMessage(user_id: string, dto: DeleteMessageDTO): Promise<void>;
+}
+
+export interface AmpqChatControllerI {
+  createChat(receiverId: string, dto: ChatCreateDTO) : void
+  sendMessage(user: User, msg: PostMessageDTO): void
 }

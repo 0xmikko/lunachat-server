@@ -60,9 +60,12 @@ export class UserController implements SocketController {
       },
 
       update: async (dto: ProfileUpdateDTO, opHash: string) => {
-        console.log(dto);
+        const dtoCut : ProfileUpdateDTO = {
+          name: dto.name,
+          avatar: dto.avatar,
+        }
         try {
-          const result = await this._service.update(userId, dto);
+          const result = await this._service.updateProfile(userId, dtoCut);
           socket.emit(this._namespace + ':updateDetails', result);
           socket.ok(opHash);
         } catch (e) {

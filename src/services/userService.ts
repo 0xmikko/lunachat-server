@@ -4,6 +4,7 @@
  */
 
 import {
+  AmpqUserControllerI,
   DefaultUser,
   User,
   UserRepositoryI,
@@ -24,6 +25,7 @@ export class UserService implements UserServiceI {
   private _updateQueue: SocketUpdate[];
   private _profileInProgress: Set<string>;
   private _pusher : SocketPusher;
+  private _ampqControllerDelegate : AmpqUserControllerI
 
   public constructor(
     @inject(TYPES.UserRepository) repository: UserRepositoryI,
@@ -40,6 +42,10 @@ export class UserService implements UserServiceI {
   }
 
 
+  set ampqControllerDelegate(value: AmpqUserControllerI) {
+    this._ampqControllerDelegate = value;
+  }
+
   async createProfile(user_id: string): Promise<User> {
     const profile = DefaultUser;
     profile.id = user_id;
@@ -55,13 +61,24 @@ export class UserService implements UserServiceI {
     return await this._repository.findOneFull(user_id);
   }
 
-  async update(user_id: string, dto: ProfileUpdateDTO): Promise<User> {
-    const user = await this._repository.findOneFull(user_id);
-    if (user === undefined) throw 'User not found';
+  async updateProfile(user_id: string, dto: ProfileUpdateDTO, broadcast : boolean = true): Promise<User> {
+    console.log("GERRTINT")
+    let user = await this._repository.findOneFull(user_id);
+    if (user === undefined) {
+      console.log("CREATEING")
+      user = await this.createProfile(user_id)
+    }
+
     user.name = dto.name;
     user.avatar = dto.avatar;
+    if (dto.reader !== undefined && dto.reader !=="") user.reader = dto.reader
+    console.log("SAVING")
     await this._repository.save(user);
-
+    if (broadcast) {
+      dto.id = user_id
+      dto.reader = user.reader
+      await this.informNewUser(dto)
+    }
     return user;
   }
 
@@ -87,9 +104,13 @@ export class UserService implements UserServiceI {
 
   async list(): Promise<User[] | undefined> {
     const result = await this._repository.list();
-    console.log(result);
     return result;
   }
 
+  async informNewUser(dto: ProfileUpdateDTO) {
+    if (this._ampqControllerDelegate !== undefined) {
+      await this._ampqControllerDelegate.informNewUser(dto)
+    }
+  }
 
 }

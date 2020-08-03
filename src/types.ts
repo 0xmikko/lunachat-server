@@ -19,4 +19,6 @@ export const TYPES = {
   AuthController: Symbol.for('AuthController'),
   AuthService: Symbol.for('AuthService'),
   AuthWebController: Symbol.for('AuthWebController'),
+
+  AmpqController: Symbol.for('AmpqController'),
 };

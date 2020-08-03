@@ -12,6 +12,7 @@ export interface ChatCreateDTO {
 }
 
 export interface PostMessageDTO {
+    from?: string
     chatId: string;
     msg: Message;
 }

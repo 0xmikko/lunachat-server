@@ -7,7 +7,7 @@ import 'reflect-metadata';
 import config from './config';
 import express, {Application} from 'express';
 import cors from 'cors';
-import * as dbConfig from "./ormconfig";
+import * as dbConfig from './ormconfig';
 import * as path from 'path';
 import {morganLogger} from './middleware/logger';
 import bodyParser from 'body-parser';
@@ -21,17 +21,17 @@ import {SocketRouter} from './controllers/socketRouter';
 import * as Sentry from '@sentry/node';
 import {AuthWebController} from './controllers/authWebController';
 import {loginRequireMiddleware} from './middleware/loginRequired';
-import {ConnectionOptions, createConnection} from "typeorm/index";
+import {ConnectionOptions, createConnection} from 'typeorm/index';
+import {AmpqController} from './controllers/ampqController';
 
 export function createApp(): Promise<Application> {
   return new Promise<Application>(async (resolve) => {
-
     console.log(dbConfig);
     try {
       // @ts-ignore
       await createConnection(dbConfig as ConnectionOptions);
     } catch (e) {
-      console.log("TypeORM connection error: ", e);
+      console.log('TypeORM connection error: ', e);
       process.abort();
     }
 
@@ -62,18 +62,14 @@ export function createApp(): Promise<Application> {
 
     app.use(bodyParser.json());
 
+    const authController = container.get<AuthController>(TYPES.AuthController);
 
-    const authController = container.get<AuthController>(
-      TYPES.AuthController,
-    );
-
-    const userController = container.get<UserController>(
-      TYPES.UserController,
-    );
+    const userController = container.get<UserController>(TYPES.UserController);
     const chatsController = container.get<ChatsController>(
       TYPES.ChatsController,
     );
 
+    const ampqController = container.get<AmpqController>(TYPES.AmpqController);
 
     const loginRequired = loginRequireMiddleware(config.jwt_secret);
 
@@ -101,10 +97,7 @@ export function createApp(): Promise<Application> {
       pingInterval: 50000,
     });
     try {
-      const socketRouter = new SocketRouter([
-        userController,
-        chatsController,
-      ]);
+      const socketRouter = new SocketRouter([userController, chatsController]);
 
       const webAuthController = container.get<AuthWebController>(
         TYPES.AuthWebController,

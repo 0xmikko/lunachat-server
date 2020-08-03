@@ -22,6 +22,9 @@ export class User {
   @Column({default: ''})
   avatar: string;
 
+  @Column({default: ''})
+  reader: string;
+
   @ManyToMany((type) => Chat, (chat) => chat.members)
   chats: Chat[];
 
@@ -46,6 +49,7 @@ export const DefaultUser: User = {
   id: '',
   name: 'New User',
   avatar: '',
+  reader: '',
   chats: [],
   messages: [],
   contacts: [],
@@ -59,6 +63,9 @@ export interface UserRepositoryI extends BasicRepositoryI<User> {
 }
 
 export interface UserServiceI extends SocketPusherDelegateI {
+
+  ampqControllerDelegate : AmpqUserControllerI
+
   createProfile(Profile_id: string): Promise<User>;
   getProfile(Profile_id: string): Promise<User | undefined>;
   addContact(
@@ -66,9 +73,15 @@ export interface UserServiceI extends SocketPusherDelegateI {
     contact_id: string,
   ): Promise<User | undefined>;
 
-  update(
+  updateProfile(
     Profile_id: string,
     dto: ProfileUpdateDTO,
+    broadcast?: boolean,
   ): Promise<User | undefined>;
   list(): Promise<User[] | undefined>;
+  informNewUser(user: ProfileUpdateDTO) : void;
+}
+
+export interface AmpqUserControllerI {
+  informNewUser(user: ProfileUpdateDTO) : Promise<void>
 }

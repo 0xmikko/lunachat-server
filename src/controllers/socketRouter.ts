@@ -183,12 +183,12 @@ export class SocketRouter implements SocketPusher {
 
     const payload = await msg.handler();
     if (mobileClientSocket !== undefined) {
-      console.log('[UPDATE:MOBILE]', msg.event, payload);
+      console.log('[UPDATE:MOBILE]', msg.event);
       mobileClientSocket.emit(msg.event, payload);
     }
 
     if (webClientSocket !== undefined) {
-      console.log('[UPDATE:WEB]', msg.event);
+      console.log('[UPDATE:WEB]');
       webClientSocket.emit(msg.event, payload);
     }
 

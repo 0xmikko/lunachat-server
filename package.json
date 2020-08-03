@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon",
+    "dev2": "nodemon --config nodemon2.json",
     "typeorm:gen": "ts-node ./node_modules/typeorm/cli.js migration:generate --config ./src/ormconfig.ts",
     "typeorm:migrate": "ts-node ./node_modules/.bin/typeorm migration:run --config ./src/ormconfig.ts",
     "typeorm:revert": "ts-node ./node_modules/.bin/typeorm migration:revert --config ./src/ormconfig.ts",
@@ -16,7 +17,10 @@
   },
   "dependencies": {
     "@sentry/node": "^5.16.0",
+    "@types/axios": "^0.14.0",
     "ajv": "^6.12.2",
+    "amqp-ts": "^1.8.0",
+    "axios": "^0.19.2",
     "chalk": "^4.0.0",
     "class-validator": "^0.12.2",
     "cors": "^2.8.5",

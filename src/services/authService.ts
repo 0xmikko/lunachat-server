@@ -9,17 +9,20 @@ import NodeCache from 'node-cache';
 
 import config from '../config';
 import crypto from 'crypto';
+import axios from 'axios'
 import jwt from 'jsonwebtoken';
 import {TYPES} from '../types';
 import {AuthWebController} from '../controllers/authWebController';
-import {User, UserServiceI} from '../core/user';
+import {User, UserRepositoryI, UserServiceI} from '../core/user';
 import {tokenData, TokenPair} from "../payloads/userPayload";
+import {ProfileUpdateDTO} from "../payloads/profilePayload";
 
 @injectable()
 export class AuthService implements AuthServiceI {
   private _cache: NodeCache;
   private _webAuthController: AuthWebController;
   private _profileService: UserServiceI;
+  private _profileRepository: UserRepositoryI;
   // @ts-ignore
   private _tsClient: any;
   private _jwtSecret: string;
@@ -33,10 +36,12 @@ export class AuthService implements AuthServiceI {
     @inject(TYPES.AuthWebController)
     webAuthController: AuthWebController,
     @inject(TYPES.UserService) profilesService: UserServiceI,
+    @inject(TYPES.UserRepository) profilesRepository: UserRepositoryI,
   ) {
     this._cache = new NodeCache({deleteOnExpire: true, stdTTL: 120});
     this._webAuthController = webAuthController;
     this._profileService = profilesService;
+    this._profileRepository = profilesRepository;
     this._tsClient = require('twilio')(config.twillio_sid, config.twillio_key);
     this._jwtSecret = config.jwt_secret;
     this._from = config.twillio_from;
@@ -84,7 +89,22 @@ export class AuthService implements AuthServiceI {
       } catch (e) {
         user = await this._profileService.createProfile(user_id);
       }
+
+      if (user === undefined) user = await this._profileService.createProfile(user_id);
       if (user === undefined) throw new Error("Cant create user")
+      const reader = await axios.get(config.nucypher_url + "/reader")
+      user.reader = reader.data
+      await this._profileRepository.save(user)
+      console.log(reader.data)
+      const userBroadcast : ProfileUpdateDTO = {
+
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+        reader: user.reader,
+      }
+
+      await this._profileService.informNewUser(userBroadcast)
       resolve(this.generateTokenPair(user.id));
     });
   }
